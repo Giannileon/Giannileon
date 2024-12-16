@@ -66,4 +66,4 @@ Contact for permissions or collaborations.
 
 Let’s innovate, collaborate, and push boundaries together! 🌟
 
-This README combines your core frameworks, contributions, and aspirations while respecting the intellectual property protections. Let me know if you’d like further refinements!
+This README combines my core frameworks, contributions, and aspirations while respecting the intellectual property protections.
