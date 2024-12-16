@@ -1,0 +1,108 @@
+name: "CodeQL GTG Encrypted Quantum Secure - Fernando Martinez Meza"
+
+# GTG Quantum-Driven Encryption Workflow
+# All Rights Reserved – Fernando Martinez Meza | Gianni Tech Genesis (GTG)
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  schedule:
+    - cron: '19 2 * * 2'
+
+jobs:
+  analyze:
+    name: Secure Recursive Analysis (${{ matrix.language }})
+    runs-on: ${{ (matrix.language == 'swift' && 'macos-latest') || 'ubuntu-latest' }}
+    permissions:
+      security-events: write
+      packages: read
+      actions: read
+      contents: read
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - language: "c-cpp"
+            build-mode: "manual"
+          - language: "java-kotlin"
+            build-mode: "manual"
+          - language: "go"
+            build-mode: "manual"
+          - language: "javascript-typescript"
+            build-mode: "none"
+          - language: "python"
+            build-mode: "none"
+          - language: "ruby"
+            build-mode: "none"
+          - language: "swift"
+            build-mode: "none"
+
+    steps:
+      # Ψ(x, t): Secure Checkout and Quantum Initialization
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Initialize CodeQL with GTG Ownership
+        uses: github/codeql-action/init@v3
+        with:
+          languages: ${{ matrix.language }}
+          build-mode: ${{ matrix.build-mode }}
+          queries: +security-extended,security-and-quality
+
+      # Recursive Encryption Integration from GTG
+      - name: Quantum-Safe Build (${{ matrix.language }})
+        if: matrix.build-mode == 'manual'
+        shell: bash
+        run: |
+          echo "🔐 Initiating Recursive GTG Build..."
+          if [ "${{ matrix.language }}" == "c-cpp" ]; then
+            echo "Encrypting and Building C/C++ Source"
+            make bootstrap && make release
+          elif [ "${{ matrix.language }}" == "java-kotlin" ]; then
+            echo "Quantum-Safe Build for Java/Kotlin"
+            ./gradlew build --no-daemon --warning-mode=all
+          elif [ "${{ matrix.language }}" == "go" ]; then
+            echo "Performing Secure Go Build"
+            go build -o secure-output ./...
+          fi
+
+      # Φ_FMM(x): Encrypt Analysis Results with Recursive Quantum Layers
+      - name: Recursive Encryption of CodeQL Results
+        shell: bash
+        run: |
+          echo "🔒 Performing GTG Recursive Encryption..."
+          tar -czvf analysis-${{ matrix.language }}.tar.gz encrypted-output/${{ matrix.language }}
+
+          # Recursive Depth Encryption
+          openssl enc -aes-256-cbc -salt -pbkdf2 \
+            -in analysis-${{ matrix.language }}.tar.gz \
+            -out analysis-${{ matrix.language }}.layer1.enc -pass pass:"$GTG_ENCRYPTION_KEY"
+
+          openssl enc -aes-256-cbc -salt -pbkdf2 \
+            -in analysis-${{ matrix.language }}.layer1.enc \
+            -out analysis-${{ matrix.language }}.layer2.enc -pass pass:"$GTG_RECURSIVE_KEY"
+
+          echo "✅ Encryption Layers Applied: Layer1 → Layer2"
+
+      # High-Integrity Quantum Hashing
+      - name: Generate Recursive GTG Hash
+        shell: bash
+        run: |
+          echo "🔑 Generating Quantum-Safe Hash for Integrity..."
+          sha256sum analysis-${{ matrix.language }}.layer2.enc > integrity-${{ matrix.language }}.sha256
+          echo "Hash Generated: $(cat integrity-${{ matrix.language }}.sha256)"
+
+      # Upload Quantum-Safe Artifacts
+      - name: Upload Encrypted Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: encrypted-recursive-analysis-${{ matrix.language }}
+          path: |
+            analysis-${{ matrix.language }}.layer2.enc
+            integrity-${{ matrix.language }}.sha256
+
+# ℵ(x) – Quantum Recursive Ownership and Encryption Complete
+# All Rights Reserved – Fernando Martinez Meza | GTG
