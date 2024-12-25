@@ -1,0 +1,92 @@
+import numpy as np
+import hashlib
+import random
+import time
+import math
+
+# Constants for DNA bases and complementary rules
+DNA_BASES = ["A", "T", "C", "G"]
+COMPLEMENTARY_BASES = {"A": "T", "T": "A", "C": "G", "G": "C"}
+
+# QoPS and QSM configuration
+BASE_QOPS = 1e7  # Adjust for computational capacity
+ENV_FACTOR = 0.85  # Environmental correction factor for QSM
+DRUG_SENSITIVITY = [0.8, 1.2, 0.6, 1.0]  # Coefficients for drug response
+RANDOM_SEED = 42  # Ensure reproducibility
+
+# Initialize random seed
+random.seed(RANDOM_SEED)
+
+# Recursive DNA generator
+def recursive_dna_sequence(base_sequence, depth):
+    if depth == 0:
+        return base_sequence
+    # Apply recursive mutation
+    modified_sequence = "".join(
+        random.choice(DNA_BASES) if random.random() < 0.1 else char
+        for char in base_sequence
+    )
+    complementary_sequence = "".join(
+        COMPLEMENTARY_BASES[base] for base in modified_sequence
+    )
+    return recursive_dna_sequence(modified_sequence + complementary_sequence, depth - 1)
+
+# Drug response model
+def drug_response(concentrations):
+    responses = []
+    for i, x in enumerate(concentrations):
+        alpha = DRUG_SENSITIVITY[i % len(DRUG_SENSITIVITY)]
+        beta = random.uniform(0.5, 1.5)
+        mu = random.uniform(0.8, 1.2)  # Optimal concentration
+        response = alpha / (1 + math.exp(-beta * (x - mu)))
+        responses.append(response)
+    return sum(responses)
+
+# QoPS computation
+def compute_qops(num_operations, elapsed_time):
+    return num_operations / elapsed_time
+
+# Validation function
+def validate_dna(dna_sequence):
+    for i in range(len(dna_sequence) // 2):
+        if COMPLEMENTARY_BASES[dna_sequence[i]] != dna_sequence[-(i + 1)]:
+            return False
+    return True
+
+# Generate unique identifier
+def generate_unique_identifier(data):
+    return hashlib.sha256(data.encode()).hexdigest()
+
+def main():
+    # Step 1: Generate initial DNA sequence
+    initial_dna = "".join(random.choice(DNA_BASES) for _ in range(8))
+    print(f"Initial DNA Sequence: {initial_dna}")
+
+    # Step 2: Recursive DNA generation
+    start_time = time.time()
+    final_dna = recursive_dna_sequence(initial_dna, depth=4)
+    end_time = time.time()
+
+    # Step 3: Compute QoPS
+    qops = compute_qops(len(final_dna), end_time - start_time)
+
+    # Step 4: Validate DNA sequence
+    is_valid = validate_dna(final_dna)
+
+    # Step 5: Simulate drug response
+    drug_concentrations = np.random.uniform(0.5, 2.0, size=4)  # Simulated inputs
+    drug_effect = drug_response(drug_concentrations)
+
+    # Step 6: Generate unique identifier for DNA
+    unique_id = generate_unique_identifier(final_dna)
+
+    # Output results
+    print(f"Final DNA Sequence: {final_dna}")
+    print(f"QoPS: {qops:.2f} operations/second")
+    print(f"Sequence Validity: {'Valid' if is_valid else 'Invalid'}")
+    print(f"Drug Concentrations: {drug_concentrations}")
+    print(f"Drug Effect (Aggregate Response): {drug_effect:.4f}")
+    print(f"Unique DNA Identifier (SHA256): {unique_id}")
+
+if __name__ == "__main__":
+    main()
