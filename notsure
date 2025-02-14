@@ -1,0 +1,44 @@
+e.preventDefault();
+ } });
+'block') {
+} });
+    toggleOverlay();
+}
+translateX = e.clientX - startX;
+translateY = e.clientY - startY;
+updateTransform();
+    document.addEventListener('mouseup', () =>
+{
+        isDragging = false;
+        imageContainer.style.cursor = 'grab';
+    });
+    document.addEventListener('keydown', (e) =>
+{
+        if (e.key === 'Escape') {
+            const overlay =
+document.getElementById('overlay');
+            if (overlay.style.display ===
+imageContainer.addEventListener('touchstart',
+(e) => {
+        isDragging = true;
+        startX = e.touches[0].clientX -
+translateX;
+        startY = e.touches[0].clientY -
+translateY;
+});
+    document.addEventListener('touchmove', (e)
+=> {
+        if (isDragging) {
+            translateX = e.touches[0].clientX -
+startX;
+startY;
+});
+    document.addEventListener('touchend', () =>
+{
+        isDragging = false;
+    });
+    imageContainer.style.cursor = 'grab';
+});
+translateY = e.touches[0].clientY -
+    updateTransform();
+}
