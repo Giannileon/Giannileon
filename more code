@@ -1,0 +1,48 @@
+import numpy as np
+import matplotlib.pyplot as plt
+import random
+
+def generate_holographic_image():
+    # Define the grid for the holographic projection
+    grid_size = 300
+    x = np.linspace(-10, 10, grid_size)
+    y = np.linspace(-10, 10, grid_size)
+    X, Y = np.meshgrid(x, y)
+
+    # Initialize the interference pattern
+    Z = np.zeros_like(X)
+    
+    # Seed for deterministic randomness (based on a fixed value or can be changed)
+    np.random.seed(42)
+    random.seed(42)
+    
+    # Determine a random number of wave layers (chaos-driven)
+    num_waves = random.randint(5, 10)
+    
+    # Superimpose multiple sine waves with random parameters
+    for i in range(num_waves):
+        freq = np.random.uniform(0.5, 2.5)            # Random frequency
+        phase = np.random.uniform(0, 2 * np.pi)         # Random phase shift
+        angle = np.random.uniform(0, 2 * np.pi)         # Random orientation
+        # Create the wave and add it to the interference pattern
+        Z += np.sin(freq * (X * np.cos(angle) + Y * np.sin(angle)) + phase)
+    
+    # Normalize Z to the range [0, 1] for better visualization
+    Z = (Z - Z.min()) / (Z.max() - Z.min())
+    
+    # Create a 3D surface plot to simulate the holographic projection
+    fig = plt.figure(figsize=(12, 10))
+    ax = fig.add_subplot(111, projection='3d')
+    surf = ax.plot_surface(X, Y, Z, cmap='viridis', edgecolor='none', alpha=0.8)
+    
+    # Remove axes for a cleaner, more "holographic" look
+    ax.set_axis_off()
+    ax.set_title("Holographic Image Projection - Chaos-Driven", pad=20)
+    
+    # Optionally add a color bar to indicate intensity variations
+    fig.colorbar(surf, shrink=0.5, aspect=10)
+    
+    plt.show()
+
+# Generate and display the holographic image
+generate_holographic_image()
