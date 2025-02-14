@@ -1,44 +1,220 @@
-e.preventDefault();
- } });
-'block') {
-} });
-    toggleOverlay();
-}
-translateX = e.clientX - startX;
-translateY = e.clientY - startY;
-updateTransform();
-    document.addEventListener('mouseup', () =>
-{
+document.addEventListener('DOMContentLoaded', () => {
+   
+    const style = document.createElement('style');
+    style.textContent = `
+        body { margin: 0; padding: 0; font-family: Arial, sans-serif; overflow: hidden; }
+        .container { position: relative; width: 100vw; height: 100vh; overflow: hidden; background-color: #000; display: flex; justify-content: center; align-items: center; }
+        .image-container { position: relative; width: 100%; }
+        #viewer-image { width: 100%; height: auto; display: block; transform-origin: center center; user-select: none; }
+        .controls-wrapper { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; pointer-events: none; opacity: 0; transition: opacity 0.3s ease; }
+        .container:hover + .controls-wrapper, .controls-wrapper:hover { opacity: 1; }
+        .hamburger { position: fixed; top: 15px; right: 15px; z-index: 1000; cursor: pointer; padding: 8px; pointer-events: auto; }
+        .hamburger div { width: 28px; height: 3px; background-color: white; margin: 6px 0; transition: 0.4s; }
+        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000000; display: none; z-index: 999; padding-top: 60px; box-sizing: border-box; overflow-y: auto; }
+        .close-x { position: fixed; top: 20px; right: 20px; color: white; font-size: 36px; cursor: pointer; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; z-index: 1001; }
+        .overlay-content { color: white; padding: 0px 60px; margin: 0 auto 50px; max-width: 800px; line-height: 1.6; font-size: 16px; position: relative; }
+        .zoom-controls { position: fixed; bottom: 15px; right: 15px; z-index: 1000; padding: 6px; display: flex; gap: 15px; pointer-events: auto; }
+        .zoom-controls button { padding: 6px; cursor: pointer; border: none; background: none; color: white; font-size: 24px; width: 36px; height: 36px; display: inline-flex; align-items: center; justify-content: center; }
+        @media (max-width: 768px) {
+            .overlay-content { padding: 0 30px; }
+            .zoom-controls { bottom: 10px; right: 10px; }
+            .zoom-controls button { width: 36px; height: 36px; font-size: 18px; }
+            .hamburger { top: 10px; right: 10px; }
+            .close-x { top: 15px; right: 15px; }
+        }
+    `;
+    document.head.appendChild(style);
+
+    const artworkData = {
+        artist: "Georges Braque",
+        lifespan: "1882-1963",
+        title: "ThÃ©iÃ¨re avec Raisins",
+        date: "(c. 1955-1963)",
+        medium: "Oil on canvas",
+        dimensions: "46 Ã— 55 cm (18.1 Ã— 21.7 in)"
+    };
+
+    function createOverlayContent() {
+        const content = document.createElement('div');
+        content.className = 'overlay-content';
+        
+        content.innerHTML = `
+            <h2 style="margin-bottom: 0px;">${artworkData.artist}</h2>
+            <p style="margin-top: 0; margin-bottom: 5px;">${artworkData.lifespan}</p>
+            
+            <h3 style="margin-top: 30px; margin-bottom: 5px;">
+                ${artworkData.title} 
+                <span style="font-weight: normal;">${artworkData.date}</span>
+            </h3>
+            
+            <p style="margin-top: 0px; margin-bottom: 0px">
+                <span style="font-weight: normal;">${artworkData.medium}</span>
+            </p>
+            <p style="margin-top: 0px; margin-bottom: 0px">
+                <span style="font-weight: normal;">${artworkData.dimensions}</span>
+            </p>
+            
+            <hr>   
+
+            <p>OCTARR's first ordinal is an overlooked masterpiece by the great Georges Braque, co-founder of Cubism along with Pablo Picasso.</p>
+
+            <p>"ThÃ©iÃ¨re avec Raisins" represents a deeply intriguing chapter in Georges later years. Untitled and unsigned at the time of his death in 1963, the painting encapsulates the experimental and introspective qualities of his final works, showcasing his meticulous process of layering pigment and revisiting motifs such as the teapot and grapes. While questions remain about whether it was completed, its authenticity and provenance are well established through the Braque estate, inherited by the family of sculptor Henri Laurens, followed by his grandson Quentin Laurens.</p>
+
+            <h3>A Masterpiece in Progress</h3>
+            <p>However, ThÃ©iÃ¨re avec Raisins has never been fully appreciated for what it truly represents. In previously published documentation, the title, the dates and the technique were incomplete, and the fact that the painting was in Braque's studio over many years being constantly reworked has never been mentioned. We have gathered extensive evidence to prove the painting deserves a reexamination. It is part of a body of work often dismissed as "the late works," despite recognition from figures like Marc Chagall, Alberto Giacometti and Sir John Richardson (Picasso's biographer), who regarded them as works of genius.</p>
+
+            <h3>Historical Context and Stylistic Significance</h3>
+            <p>The painting represents years of work, beginning in the mid 1950s, reflecting Braque's methodical approach to evolving his important compositions. The many textured areas applied painstakingly with palette knives, exemplify his pursuit of tactile depth, which he considered neglected by the Impressionists.</p>
+
+            <h3>The Role of Zen Philosophy</h3>
+            <p>Braque's later works also reveal his affinity for Zen principles, particularly the idea of art as a means of transcending explanation. The levitating teapot in ThÃ©iÃ¨re avec Raisins serves as a poetic metaphor, evoking themes of balance, impermanence, and spiritual transformation.</p>
+
+            <h3>Legacy and Perspective</h3>
+            <p>ThÃ©iÃ¨re avec Raisins stands as a testament to Braque's determination to push boundaries, even in his final years. Despite battling emphysema, he continued to create until his last breath. Reportedly, Georges Braque, on his deathbed, called for his palette which included the following colors:</p>
+
+            <ul>
+                <li>Raw and burnt amber</li>
+                <li>Raw and burnt sienna</li>
+                <li>Yellow ochre</li>
+                <li>Lamp, vine and bone black</li>
+                <li>Ultramarine</li>
+                <li>Orange and antimony yellow</li>
+            </ul>
+
+            <p>All of these are visible in ThÃ©iÃ¨re avec Raisins, a masterpiece encapsulating George Braque's belief that art is completed not when the artist stops, but when its meaning transcends explanation.</p>
+        `;
+
+        return content;
+    }
+
+    const root = document.getElementById('root');
+    root.innerHTML = `
+        <div class="overlay" id="overlay">
+            <div class="close-x" onclick="toggleOverlay()">&times;</div>
+            ${createOverlayContent().outerHTML}
+        </div>
+        <div class="container">
+            <div id="image-container" class="image-container">
+                <img id="viewer-image">
+            </div>
+        </div>
+        <div class="controls-wrapper">
+            <div class="hamburger" onclick="toggleOverlay()">
+                <div></div><div></div><div></div>
+            </div>
+            <div class="zoom-controls">
+                <button onclick="zoomIn()">+</button>
+                <button onclick="zoomOut()">âˆ’</button>
+                <button onclick="resetZoom()">â†º</button>
+            </div>
+        </div>
+    `;
+
+    const MIN_SCALE = 0.9;
+    const MAX_SCALE = 5;
+    const ZOOM_FACTOR = 1.05;
+    let scale = MIN_SCALE;
+    let isDragging = false;
+    let startX, startY, translateX = 0, translateY = 0;
+    const imageContainer = document.getElementById('image-container');
+    const image = document.getElementById('viewer-image');
+
+    const baseImage = document.getElementById('base64-image');
+    image.src = baseImage.src;
+
+    // Add onload handler to set initial scale
+    image.onload = () => {
+        scale = MIN_SCALE;
+        updateTransform();
+    };
+
+    window.zoomIn = () => {
+        scale = Math.min(MAX_SCALE, scale * ZOOM_FACTOR);
+        updateTransform();
+    };
+
+    window.zoomOut = () => {
+        scale = Math.max(MIN_SCALE, scale / ZOOM_FACTOR);
+        updateTransform();
+    };
+
+    window.resetZoom = () => {
+        scale = MIN_SCALE;
+        translateX = 0;
+        translateY = 0;
+        updateTransform();
+    };
+
+    window.toggleOverlay = () => {
+        const overlay = document.getElementById('overlay');
+        const zoomControls = document.querySelector('.zoom-controls');
+        const hamburgerMenu = document.querySelector('.hamburger');
+        const isClosing = overlay.style.display === 'block';
+        
+        overlay.style.display = isClosing ? 'none' : 'block';
+        zoomControls.style.display = isClosing ? 'block' : 'none';
+        hamburgerMenu.style.display = isClosing ? 'block' : 'none';
+    };
+
+    function updateTransform() {
+        image.style.transform = `scale(${scale}) translate(${translateX/scale}px, ${translateY/scale}px)`;
+    }
+
+    imageContainer.addEventListener('wheel', (e) => {
+        e.preventDefault();
+        const delta = Math.sign(e.deltaY);
+        if (delta > 0) zoomOut();
+        else zoomIn();
+    });
+
+    imageContainer.addEventListener('mousedown', (e) => {
+        e.preventDefault();
+        isDragging = true;
+        startX = e.clientX - translateX;
+        startY = e.clientY - translateY;
+        imageContainer.style.cursor = 'grabbing';
+    });
+
+    document.addEventListener('mousemove', (e) => {
+        if (isDragging) {
+            e.preventDefault();
+            translateX = e.clientX - startX;
+            translateY = e.clientY - startY;
+            updateTransform();
+        }
+    });
+
+    document.addEventListener('mouseup', () => {
         isDragging = false;
         imageContainer.style.cursor = 'grab';
     });
-    document.addEventListener('keydown', (e) =>
-{
+
+    document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') {
-            const overlay =
-document.getElementById('overlay');
-            if (overlay.style.display ===
-imageContainer.addEventListener('touchstart',
-(e) => {
+            const overlay = document.getElementById('overlay');
+            if (overlay.style.display === 'block') {
+                toggleOverlay();
+            }
+        }
+    });
+
+    imageContainer.addEventListener('touchstart', (e) => {
         isDragging = true;
-        startX = e.touches[0].clientX -
-translateX;
-        startY = e.touches[0].clientY -
-translateY;
-});
-    document.addEventListener('touchmove', (e)
-=> {
+        startX = e.touches[0].clientX - translateX;
+        startY = e.touches[0].clientY - translateY;
+    });
+
+    document.addEventListener('touchmove', (e) => {
         if (isDragging) {
-            translateX = e.touches[0].clientX -
-startX;
-startY;
-});
-    document.addEventListener('touchend', () =>
-{
+            translateX = e.touches[0].clientX - startX;
+            translateY = e.touches[0].clientY - startY;
+            updateTransform();
+        }
+    });
+
+    document.addEventListener('touchend', () => {
         isDragging = false;
     });
+
     imageContainer.style.cursor = 'grab';
 });
-translateY = e.touches[0].clientY -
-    updateTransform();
-}
