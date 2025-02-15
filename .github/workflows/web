@@ -1,0 +1,178 @@
+// loadAndPrepareSongDataOrginalPakoHackUpdatedToRemove16ChannelCap.js
+(async () => {
+  const e = ["projectName", "artistName", "projectBPM", "currentSequence", "channelURLs", "channelVolume", "channelPlaybackSpeed", "trimSettings", "projectChannelNames", "startSliderValue", "endSliderValue", "totalSampleDuration", "start", "end", "projectSequences", "steps"],
+    t = e.reduce(((e, t, r) => ({
+      ...e,
+      [t]: r
+    })), {});
+
+  function r(e) {
+    if ("string" == typeof e) {
+      const t = e.trim();
+      if (/^[A-Za-z]$/.test(t)) return t.toUpperCase().charCodeAt(0) - 65;
+      if (/^\d+$/.test(t)) return parseInt(t, 10);
+      {
+        const e = Number(t);
+        if (!isNaN(e)) return e
+      }
+    } else if ("number" == typeof e) return e
+  }
+  const n = async n => {
+    try {
+      const o = await fetch(n);
+      if (!o.ok) throw new Error(`Network error for ${n}`);
+      const a = window.pako.inflate(new Uint8Array(await o.arrayBuffer()));
+      return (n => {
+        const o = n => Array.isArray(n) ? n.map(o) : n && "object" == typeof n ? Object.entries(n).reduce(((n, [a, s]) => {
+          const l = e[a] || a;
+          return n[l] = "projectSequences" === l ? Object.fromEntries(Object.entries(s).map((([e, n]) => [`Sequence${e.replace(/^s/,"")}`, Object.fromEntries(Object.entries(n).map((([e, n]) => {
+            var o;
+            return [`ch${r(e)}`, {
+              steps: (o = n[t.steps] || [], o.flatMap((e => "number" == typeof e ? e : e?.r ? Array.from({
+                length: e.r[1] - e.r[0] + 1
+              }, ((t, r) => e.r[0] + r)) : "string" == typeof e && e.endsWith("r") ? {
+                index: parseInt(e.slice(0, -1), 10),
+                reverse: !0
+              } : [])))
+            }]
+          })))]))) : o(s), n
+        }), {}) : n;
+        return o(n)
+      })(JSON.parse(new TextDecoder("utf-8").decode(a)))
+    } catch (e) {
+      throw console.error(`Error fetching/deserializing ${n}:`, e), e
+    }
+  };
+  try {
+    const e = songDataUrls.filter((e => e.trim() && !e.trim().startsWith("//")));
+    if (e.length) {
+      await async function() {
+        try {
+          const e = await fetch("/content/2109694f44c973892fb8152cf5c68607fb19288c045af1abc1716c1c3b4d69e6i0"),
+            t = await e.text(),
+            r = (new DOMParser).parseFromString(t, "text/html").querySelector("script");
+          if (!r || !r.textContent.includes("pako")) throw new Error("Pako library not found.");
+          document.head.append(Object.assign(document.createElement("script"), {
+            textContent: r.textContent
+          }))
+        } catch (e) {
+          console.error("Error loading Pako:", e)
+        }
+      }();
+      const t = await (async e => {
+        const t = (await Promise.all(e.map(((e, t) => n(e).then((e => ({
+          d: e,
+          i: t
+        }))).catch((t => (console.error(`Failed ${e}:`, t), null))))))).filter(Boolean);
+        if (!t.length) throw new Error("No valid data.");
+        return t
+      })(e);
+      (e => {
+        console.log(`Total Songs: ${e.length}`), e.forEach((({
+          id: e,
+          artist: t,
+          bpm: r,
+          totalSequences: n,
+          channels: o,
+          projectSequences: a
+        }) => {
+          console.log(`\n${e} by ${t} - BPM: ${r} - Total Sequences: ${n}`), o.forEach((({
+            id: e,
+            metadata: t
+          }, r) => {
+            const {
+              volume: n,
+              playbackSpeed: o,
+              trimStartTime_Percentage: a,
+              trimEndTime_Percentage: s,
+              requiresReversal: l
+            } = t;
+            console.log(`\tChannel ${r+1} - ${e}, Volume: ${n}, Speed: ${o}, Trim: ${a}% - ${s}%, Reversal: ${l}`)
+          })), console.log(`\tProject Sequences:\n${JSON.stringify(a,null,2)}`)
+        })), globalData.initialSampleOrder.length && (console.log(`\nInitial Sample Order for ${e[0].id}:`), globalData.initialSampleOrder.forEach((({
+          channelId: e,
+          reverse: t
+        }, r) => {
+          console.log(`\t${r+1}. Channel: ${e}, Reverse: ${t}`)
+        }))), globalData.isArtworkCover && artworkUrl.length && (console.log("\nArtwork URL(s):", artworkUrl), (e => {
+          const t = document.getElementById("artworkImage");
+          t ? (t.src = e, t.parentElement.style.display = "flex") : console.warn("Artwork cover elements not found.")
+        })(artworkUrl[0])), globalData.isSingleSong = 1 === e.length, globalData.isMultipleSongs = e.length > 1, console.log(`\nFlags - Single Song: ${globalData.isSingleSong}, Multiple Songs: ${globalData.isMultipleSongs}`), document.dispatchEvent(new CustomEvent("dataLoadingComplete", {
+          detail: {
+            success: !0,
+            totalSongs: e.length,
+            songs: e.map((({
+              id: e,
+              totalSequences: t
+            }) => ({
+              id: e,
+              totalSequences: t
+            })))
+          }
+        }))
+      })((e => {
+        const t = e.sort(((e, t) => e.idx - t.idx)).map((({
+          d: e,
+          i: t
+        }) => {
+          const {
+            projectName: r = `Song_${t+1}`,
+            artistName: n = "Unknown Artist",
+            projectBPM: o = 120,
+            projectSequences: a = {},
+            channelURLs: s = [],
+            channelVolume: l = [],
+            channelPlaybackSpeed: c = [],
+            trimSettings: i = {}
+          } = e, g = Math.max(s.length, l.length, c.length), d = Array.from({
+            length: g
+          }, ((e, t) => {
+            return {
+              id: (r = t, r < 26 ? String.fromCharCode(65 + r) : r.toString()),
+              url: s[t] || "URL_not_found",
+              metadata: {
+                volume: l[t] ?? 1,
+                playbackSpeed: c[t] ?? 1,
+                trimStartTime_Percentage: i[t]?.start || 0,
+                trimEndTime_Percentage: i[t]?.end || 100,
+                requiresReversal: Object.values(a).some((e => Object.values(e).some((e => e.steps.some((e => "object" == typeof e && e.reverse))))))
+              }
+            };
+            var r
+          }));
+          return {
+            id: `Song ${t+1}: ${r}`,
+            artist: n,
+            bpm: o,
+            totalSequences: Object.keys(a).length,
+            channels: d,
+            projectSequences: a
+          }
+        }));
+        return globalData.songsArray = t, t.length && (globalData.initialSampleOrder = (e => {
+          const {
+            projectSequences: t
+          } = e, r = [];
+          return Object.keys(t).sort().slice(0, 2).forEach((e => {
+            const n = t[e];
+            Object.values(n).forEach((({
+              steps: e
+            }, t) => {
+              e.forEach((e => {
+                if ("number" == typeof e || "object" == typeof e && void 0 !== e.index) {
+                  const n = `${t}_${e.reverse?"r":"f"}`;
+                  r.some((e => `${e.channelId}_${e.reverse?"r":"f"}` === n)) || r.push({
+                    channelId: `ch${t}`,
+                    reverse: e.reverse || !1
+                  })
+                }
+              }))
+            }))
+          })), r
+        })(t[0])), t
+      })(t))
+    } else console.log("No valid song data URLs to process.")
+  } catch (e) {
+    console.error("Initialization error:", e)
+  }
+})();
