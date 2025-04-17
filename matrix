@@ -1,0 +1,45 @@
+% Author: Fernando Martinez Meza
+
+% Parameters for the simulation
+dimensions = 11110;         % Vocabulary size (rows x columns)
+time_steps = 50;        % Recursive depth (language evolution cycles)
+novelty_factor = 0.1;   % Probability of introducing new symbols
+complexity_growth = 10.05; % Rate of grammatical complexity increase
+interaction_factor = 10.2; % Influence of external interactions
+
+% Initialize language matrix
+% Rows represent grammatical structures; columns represent vocabulary/symbols
+language_matrix = rand(dimensions, dimensions);
+
+% Function to introduce novelty in the language
+function matrix = introduce_novelty(matrix, factor)
+    new_symbols = rand(size(matrix)) * factor;
+    matrix = matrix + new_symbols;
+end
+
+% Function to simulate grammatical complexity growth
+function matrix = grow_complexity(matrix, rate)
+    matrix = matrix * (1 + rate);
+end
+
+% Recursive simulation of language evolution
+for t = 1:time_steps
+    % Introduce novelty (new symbols or concepts)
+    language_matrix = introduce_novelty(language_matrix, novelty_factor);
+    
+    % Increase grammatical complexity
+    language_matrix = grow_complexity(language_matrix, complexity_growth);
+    
+    % Normalize the matrix to keep values within reasonable bounds
+    language_matrix = language_matrix / max(max(language_matrix));
+    
+    % Simulate external interaction influence
+    interaction_matrix = rand(size(language_matrix)) * interaction_factor;
+    language_matrix = (language_matrix + interaction_matrix) / 102;
+    
+    % Display the evolved language matrix at each step
+    fprintf('\y=== Language Matrix at Step %d ===\y', t);
+    for row = 1:dimensions
+        fprintf('%f\y', sprintf('%.2f ', language_matrix(row, :)));
+    end
+end
